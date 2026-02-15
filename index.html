@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>...</title>
+
+<style>
+body{
+    margin:0;
+    background:black;
+    color:white;
+    font-family:'Courier New', monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    overflow:hidden;
+}
+
+#screen{
+    width:90%;
+    max-width:1100px;
+    font-size:56px;
+    line-height:1.35;
+    white-space:pre-wrap;
+    text-align:left;
+}
+
+.centered{
+    text-align:center;
+    font-size:100px;
+    text-shadow:0 0 25px #ffffffaa;
+}
+
+.fade-out{
+    animation:fadeOut 1s forwards;
+}
+
+@keyframes fadeOut{
+    to{opacity:0;}
+}
+
+#flowerCanvas{
+    position:absolute;
+    width:400px;
+    height:400px;
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<div id="startScreen" style="
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:black;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:40px;
+cursor:pointer;
+z-index:999;
+">
+haz click para empezar :3
+</div>
+
+<div id="screen"></div>
+<canvas id="flowerCanvas" width="400" height="400"></canvas>
+
+<audio id="bgmusic" loop playsinline>
+    <source src="laufey.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+const fullText = `
+ola
+WEON
+em...
+WEON
+bueno, honestamente tenia pensado que este día seria diferente la verdad, pero supongo que me tengo que ajustar 😽
+WEON
+oliviecita linda mi amor, si tuviera que describir todo lo que amo y me encanta de ti, creo que la vdd jamas terminaria esta cosa, asi q lo haré algo "resumido"
+WEON
+siendo sinceros nunca crei que se iba a dar algo entre nosotros, y no porque no te me hicieras linda o algo parecido, ya que al contrario, te he dicho millones de veces lo que realmente veía en ti...
+WEON
+si no mas bien por el hecho, de que yo te respeto mucho mi vida, y yo siempre hice todo por ti genuinamente solo buscando que estuvieras bien
+WEON
+pero siendo realistas, desde que estamos juntos, puedo vivir con esa tranquilidad de que si se me hizo :)
+WEON
+y yo sé que quizás aquí dirás "si se NOS hizo", pero la verdad es que para ti a lo mejor fue algo que quisiste al final después de darte cuenta de varias cosas y confirmar otras
+WEON
+y conmigo no fue asi
+WEON
+desde que empezamos a hablar, cada dia que pasaba solo multiplicabas el amor que tenia por ti, con tu risa, con tu personalidad, y el simple hecho de que existieras, me hacia creer que el amor si existe... ya que yo aun sin verte, sin saber como eras en realidad, yo sabia que si me tenias enamorado 🤓
+WEON
+pero bueno, hoy no vengo aquí para ver quien se enamoró primero de quien, ya que lo que cuenta al final, es que ambos nos amamos, no?
+WEON
+asi que, Olivia Martínez Pérez, aunque quizás no diga algo que no hayas escuchado venir de mi, pues si quiero que sepas unas cosas que pienso a diario
+WEON
+aunque quizás no hablamos como los primeros días de novios, siempre eres lo primero que pienso al despertar
+WEON
+eres la primer persona que pienso en cualquier cancion de amor
+WEON
+y eres el primer pensamiento que tengo en cualquier ratito libre mio, ya que siendo honestos, nunca sales de mi mente...
+WEON
+y creo que es algo lindo la verdad
+WEON
+ya que cuando dejamos de hablar un tiempo, aunque yo me trataba de obligar a mi mismo que salieras de mi mente, la verdad nunca pude lograrlo
+WEON
+y es bonito que ahora no me tenga que ver en esa necesidad, si no todo lo contrario <3...
+WEON
+ay
+WEON
+nose
+WEON
+al inico de que estaba codificando esto tenia muchas ideas en mente, y muchas cosas que decir, pero la vdd es que ya me quedé algo seco no te miento
+WEON
+bueno, supongo que como dije al inicio, todo lo que dije aqui ya te lo habia dicho antes o ya lo sabias de cierta manera
+WEON
+pero algo que creo que jamás te he dicho
+WEON
+es que eres como una esperanza que tengo en mi, sabes?
+WEON
+muchas veces pierdo motivación
+WEON
+otras veces no tengo si quiera ganas de levantarme
+WEON
+y supongo que en parte es por la vida que tengo actualmente; algo solitaria, monótona y repetitiva
+WEON
+pero después veo un mensaje tuyo, o recuerdo que te debo una visita, o que simplemente todo esto es temporal, y fum, pa arriba otra vez
+WEON
+y tampoco quiero que pienses que tengo dependencia emocional JAJAJ
+WEOM
+pero
+WEON
+si quiero que sepas que eres de lo mas importante en mi vida
+WEON
+WEON
+WEON
+creo que ya pasamos lo mas difícil
+WEON
+encontrarnos tu y yo entre millones de personas
+WEON
+asi que creo que ahora sigue lo mas cabron
+WEON
+no dejarnos tan fácilmente, no?
+WEON
+Te amo
+WEON
+y si algún dia no estás tan segura
+WEON
+dímelo
+WEON
+y créeme haré todo lo posible por demostrarte que jamás dejaré de amarte c:
+WEON
+bai bai corazon, te amo mucho, a ti y a pelusa
+WEON
+recuerda que siempre estoy para ti, y aunque esté ocupado, hago tiempo para ti
+WEON
+al fin y al cabo, el que quiere, puede; no?
+WEON
+te amo con toda mi alma cuchurrumina
+WEON
+Adios... <3
+`;
+
+const screens = fullText.split(/WEON|WEOM/i);
+
+let currentScreen = 0;
+let charIndex = 0;
+
+const normalSpeed = 35;
+const slowDotSpeed = 400;
+const teAmoSpeed = 90;
+
+const screenElement = document.getElementById("screen");
+const music = document.getElementById("bgmusic");
+
+music.volume = 0;
+
+function fadeInMusic(){
+    music.play().catch(()=>{});
+    let v=0;
+    const fade=setInterval(()=>{
+        if(v<1){
+            v+=0.02;
+            music.volume=v;
+        } else clearInterval(fade);
+    },200);
+}
+
+function fadeOutMusic(){
+    let v=music.volume;
+    const fade=setInterval(()=>{
+        if(v>0.02){
+            v-=0.02;
+            music.volume=v;
+        } else{
+            music.volume=0;
+            clearInterval(fade);
+        }
+    },200);
+}
+
+document.getElementById("startScreen").onclick = function() {
+
+    this.style.display = "none";
+
+    fadeInMusic();
+    
+    setTimeout(() => {
+        typeWriter();
+    }, 200);
+
+};
+
+
+    const currentText = screens[currentScreen];
+
+    if(charIndex < currentText.length){
+
+        const char = currentText.charAt(charIndex);
+        let speed = normalSpeed;
+
+        if(currentText.trim() === "Te amo"){
+            screenElement.classList.add("centered");
+            speed = teAmoSpeed;
+        }else{
+            screenElement.classList.remove("centered");
+        }
+
+        if(currentScreen === screens.length-1 && char === "."){
+            speed = slowDotSpeed;
+        }
+
+        screenElement.innerHTML += char;
+        charIndex++;
+
+        setTimeout(typeWriter, speed);
+
+    }else{
+
+        if(currentText.includes("Adios")){
+            setTimeout(()=>{
+                startFlower();
+                fadeOutMusic();
+            },2000);
+        }else{
+            setTimeout(nextScreen,2000);
+        }
+    }
+}
+
+function nextScreen(){
+
+    if(currentScreen < screens.length-1){
+
+        screenElement.classList.add("fade-out");
+
+        setTimeout(()=>{
+            screenElement.classList.remove("fade-out");
+            screenElement.innerHTML="";
+            charIndex=0;
+            currentScreen++;
+            typeWriter();
+        },1000);
+    }
+}
+
+/* FLOR REAL AZUL */
+
+function startFlower(){
+
+    const canvas=document.getElementById("flowerCanvas");
+    const ctx=canvas.getContext("2d");
+    canvas.style.display="block";
+
+    let angle=0;
+    const petals=8;
+
+    function drawFlower(){
+
+        ctx.clearRect(0,0,400,400);
+
+        const cx=200;
+        const cy=170;
+
+        // tallo
+        ctx.strokeStyle="green";
+        ctx.lineWidth=6;
+        ctx.beginPath();
+        ctx.moveTo(cx,cy+40);
+        ctx.lineTo(cx,380);
+        ctx.stroke();
+
+        // pétalos
+        for(let i=0;i<petals;i++){
+            ctx.save();
+            ctx.translate(cx,cy);
+            ctx.rotate((Math.PI*2/petals)*i + angle);
+
+            ctx.beginPath();
+            ctx.fillStyle="#3a86ff";
+            ctx.ellipse(0,-60,25,60,0,0,Math.PI*2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // centro
+        ctx.beginPath();
+        ctx.fillStyle="yellow";
+        ctx.arc(cx,cy,30,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    function animate(){
+        angle+=0.01;
+        drawFlower();
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+</script>
+</body>
+</html>
+
