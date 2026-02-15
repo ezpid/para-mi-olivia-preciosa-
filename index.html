@@ -220,6 +220,8 @@ document.getElementById("startScreen").onclick = function() {
 };
 
 
+function typeWriter(){
+
     const currentText = screens[currentScreen];
 
     if(charIndex < currentText.length){
@@ -254,7 +256,7 @@ document.getElementById("startScreen").onclick = function() {
             setTimeout(nextScreen,2000);
         }
     }
-}
+
 
 function nextScreen(){
 
@@ -331,4 +333,3 @@ function startFlower(){
 </script>
 </body>
 </html>
-
